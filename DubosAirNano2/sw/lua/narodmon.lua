@@ -28,14 +28,12 @@ function nm_send()
 			   senddata = senddata .. "#DS18B20#"..t1.."."..t2.."\n"
 		end
 		senddata = senddata .. "#IN_COUNT#"..in_count.."\n"
-		senddata = senddata.."#ALARM#"..alarmNM.."\n"
-		senddata = senddata .. "##"
-
 		if(alarm) then 
-			alarmNM = 1
+			senddata = senddata.."#ALARM#1\n"
 		else 
-			alarmNM = 0
+			senddata = senddata.."#ALARM#0\n"
 		end
+		senddata = senddata .. "##"
 
 		local srv = net.createConnection(net.TCP, 0)
 		srv:on("connection", function(sck, c)
@@ -43,13 +41,11 @@ function nm_send()
 		end)
 		srv:on("receive", function(sck, s)
 			s1 = s:reverse()
-			if(s1:find(string.reverse("#alarm=1")) ~= nil) then
+			if(s1:find(string.reverse("ALARM=1")) ~= nil) then
 				alarm = true
-				alarmNM = 1
 				print("Alarm mode ON")
-			elseif(s1:find(string.reverse("#alarm=0")) ~= nil) then
+			elseif(s1:find(string.reverse("ALARM=0")) ~= nil) then
 				alarm = false
-				alarmNM = 0
 				print("Alarm mode OFF")
 			end
 			srv:close()

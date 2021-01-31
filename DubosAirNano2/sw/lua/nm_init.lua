@@ -10,7 +10,6 @@ out_h = 0
 in_count = 0
 
 alarm = false
-alarmNM = 0
 
 if(nm_mac == "" or nm_mac == nil) then
     nm_mac = wifi.sta.getmac()
@@ -30,12 +29,11 @@ gpio.mode(inpin, gpio.INT)
 gpio.trig(inpin, "up", function()
     in_count = in_count + 1
     if(alarm) then
-        alarmNM = 10
         if(wifi.sta.getip() ~= nil) then
         do
         	print("ALARM: Sending SMS")
         	--local srv = net.createConnection(net.TCP, 0)
-        	srv = tls.createConnection()
+        	local srv = tls.createConnection()
             srv:on("receive", function(sck, c) srv:close(); srv = nil end)
         	srv:on("connection", function(sck, c)
         	    sck:send("GET "..alarm_url.." HTTP/1.1\r\nHost: sms.ru\r\nConnection: keep-alive\r\nAccept: */*\r\n\r\n")  
@@ -43,7 +41,6 @@ gpio.trig(inpin, "up", function()
             srv:connect(443, alarm_host)
         end
         else
-            alarmNM = alarmNM + 7
             print("ALARM: Failed to connect WiFi")
         end
         alarm = false
