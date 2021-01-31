@@ -1,3 +1,5 @@
+dofile("settings.lua")
+
 uptime = 0
 narod_count = 6
 ds_count = 0
@@ -9,6 +11,11 @@ in_count = 0
 
 alarm = false
 alarmNM = 0
+
+if(nm_mac == "" or nm_mac == nil) then
+    nm_mac = wifi.sta.getmac()
+end
+print("NarodMon MAC: "..nm_mac)
 
 owpin = 4
 ow.setup(owpin)
@@ -25,13 +32,16 @@ gpio.trig(inpin, "up", function()
     if(alarm) then
         alarmNM = 10
         if(wifi.sta.getip() ~= nil) then
-            print("ALARM: Sending SMS")
-            srv = net.createConnection(net.TCP, 0)
-            srv:on("receive", function(sck, c) print(c); srv:close(); srv = nil end)
-            srv:on("connection", function(sck, c)
-                sck:send("GET "..alarm_url.." HTTP/1.1\r\nHost: sms.ru\r\nConnection: keep-alive\r\nAccept: */*\r\n\r\n")  
-            end)
-            srv:connect(80, alarm_host)
+        do
+        	print("ALARM: Sending SMS")
+        	--local srv = net.createConnection(net.TCP, 0)
+        	srv = tls.createConnection()
+            srv:on("receive", function(sck, c) srv:close(); srv = nil end)
+        	srv:on("connection", function(sck, c)
+        	    sck:send("GET "..alarm_url.." HTTP/1.1\r\nHost: sms.ru\r\nConnection: keep-alive\r\nAccept: */*\r\n\r\n")  
+        	end)
+            srv:connect(443, alarm_host)
+        end
         else
             alarmNM = alarmNM + 7
             print("ALARM: Failed to connect WiFi")

@@ -4,12 +4,7 @@ dofile("nm_init.lua")
 
 function nm_send() 
 	if(wifi.sta.getip() ~= nil) then
-		local senddata = "#"
-		if(nm_mac::strlen() < 17) then
-			senddata = senddata..wifi.sta.getmac().."\n"
-		else
-			senddata = senddata..nm_mac.."\n"
-		end
+		local senddata = "#"..nm_mac.."\n"
 		senddata = senddata.."#uptime#"..uptime.."\n"
 		if(wifi.sta.getrssi() ~= nil) then senddata = senddata.."#rssi#"..wifi.sta.getrssi().."\n" end
 		if(out_count > 0) then
