@@ -1,8 +1,11 @@
 uptime = 0			--Счётчик циклов работы
 measures = 6		--Счётчик циклов измерения
-ds_t = 0			--Текущая температура DS
-ds_count = 0		--Счётчик для усреднения показаний DS
-ds_t_sum = 0		--Суммарная температура DS
+ds1_t = 0			--Текущая температура DS1
+ds1_count = 0		--Счётчик для усреднения показаний DS1
+ds1_t_sum = 0		--Суммарная температура DS1
+ds2_t = 0			--Текущая температура DS2
+ds2_count = 0		--Счётчик для усреднения показаний DS2
+ds2_t_sum = 0		--Суммарная температура DS2
 out_t = 0			--Текущая температура внешнего модуля
 out_h = 0			--Текущая влажность внешнего модуля
 out_count = 0		--Счётчик для усреднения показаний внешнего модуля
@@ -22,8 +25,10 @@ print("NarodMon MAC: "..nm_mac)
 owpin = 4
 ow.setup(owpin)
 ow.reset_search(owpin)
-dsaddr = ow.search(owpin)
-if(dsaddr ~= nil) then print("DS18B20 found at address ", dsaddr:byte(1,8)) end
+ds1addr = ow.search(owpin)
+if(ds1addr ~= nil) then print("DS18B20 (1) found at address ", ds1addr:byte(1,8)) end
+ds2addr = ow.search(owpin)
+if(ds2addr ~= nil) then print("DS18B20 (2) found at address ", ds2addr:byte(1,8)) end
 dozoraddr = string.char(199, 194, 195, 196, 197, 198, 199, 218)   --Dozor Meteo
 print("Dozor Outdoor Module expected at address ", dozoraddr:byte(1,8))
 

@@ -19,12 +19,21 @@ function nm_send()
 			--print("Outdoor humidity = "..h1.."."..h2)
 			senddata = senddata .. "#OUT_HUM#"..h1.."."..h2.."\n"
 		end        
-		if(ds_count > 0) then   
-			local t = ds_t_sum / ds_count
+		if(ds1_count > 0) then   
+			local t = ds1_t_sum / ds1_count
 			local t1 = t / 10000
 			local t2 = t % 10000
-			--print("DS18B20 = "..t1.."."..t2)
-			senddata = senddata .. "#DS18B20#"..t1.."."..t2.."\n"
+			--print("DS18B20 1 = "..t1.."."..t2)
+			senddata = senddata .. "#DS18B20_"..ds1addr:byte(8)
+			senddata = senddata.."#"..t1.."."..t2.."\n"
+		end
+		if(ds2_count > 0) then   
+			local t = ds2_t_sum / ds2_count
+			local t1 = t / 10000
+			local t2 = t % 10000
+			--print("DS18B20 2 = "..t1.."."..t2)
+			senddata = senddata .. "#DS18B20_"..ds2addr:byte(8)
+			senddata = senddata.."#"..t1.."."..t2.."\n"
 		end
 		senddata = senddata .. "#IN_COUNT#"..in_count.."\n"
 		if(alarm) then 
@@ -61,8 +70,10 @@ function nm_send()
 	   
 	in_count = 0
 	measures = 0
-	ds_count = 0
-	ds_t_sum = 0
+	ds1_count = 0
+	ds1_t_sum = 0
+	ds2_count = 0
+	ds2_t_sum = 0
 	out_count = 0
 	out_t_sum = 0
 	out_h_sum = 0
@@ -92,10 +103,10 @@ function nm_tick()
 		out_h_sum = out_h_sum + out_h
 		out_count = out_count + 1
 	end
-	--DS18B20
-	if(dsaddr ~= nil) then
+	--DS18B20 1
+	if(ds1addr ~= nil) then
 		ow.reset(owpin)
-		ow.select(owpin, dsaddr) --MATCH ROM
+		ow.select(owpin, ds1addr) --MATCH ROM
 		ow.write(owpin, 0xBE, 1) --READ SCRATCHPAD
 		data = string.char(ow.read(owpin))
 		for i = 1, 8 do
@@ -103,9 +114,25 @@ function nm_tick()
 		end
 		local crc = ow.crc8(string.sub(data,1,8))
 		if crc == data:byte(9) then
-			ds_t = (data:byte(1) + data:byte(2) * 256) * 625
-			ds_t_sum = ds_t_sum + ds_t
-			ds_count = ds_count + 1
+			ds1_t = (data:byte(1) + data:byte(2) * 256) * 625
+			ds1_t_sum = ds1_t_sum + ds1_t
+			ds1_count = ds1_count + 1
+		end
+	end
+	--DS18B20 2
+	if(ds2addr ~= nil) then
+		ow.reset(owpin)
+		ow.select(owpin, ds2addr) --MATCH ROM
+		ow.write(owpin, 0xBE, 1) --READ SCRATCHPAD
+		data = string.char(ow.read(owpin))
+		for i = 1, 8 do
+			data = data .. string.char(ow.read(owpin))
+		end
+		local crc = ow.crc8(string.sub(data,1,8))
+		if crc == data:byte(9) then
+			ds2_t = (data:byte(1) + data:byte(2) * 256) * 625
+			ds2_t_sum = ds2_t_sum + ds2_t
+			ds2_count = ds2_count + 1
 		end
 	end
 
