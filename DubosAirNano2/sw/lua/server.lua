@@ -1,4 +1,4 @@
-srv = net.createServer(net.TCP)
+websrv = net.createServer(net.TCP)
 function receiver(sck, data)
     sck:on("sent", function() sck:close(); print("[WEB] Respond") end)
 
@@ -67,7 +67,7 @@ function receiver(sck, data)
     print("[WEB] Prepared")
 end
 
-srv:listen(80, function(conn)
+websrv:listen(80, function(conn)
     print("[WEB] Request")
     conn:on("receive", receiver)
 end)
